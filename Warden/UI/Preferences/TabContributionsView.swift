@@ -18,6 +18,17 @@ struct TabContributionsView: View {
                             SupportRow(
                                 icon: "cup.and.saucer.fill",
                                 iconColor: .secondary,
+                                title: "Pay for Warden",
+                                subtitle: "Free to use, contribute if you can",
+                                buttonTitle: "Contribute",
+                                url: AppConstants.donationURL
+                            )
+
+                            SettingsDivider()
+
+                            SupportRow(
+                                icon: "heart.fill",
+                                iconColor: .secondary,
                                 title: "Buy Me a Coffee",
                                 subtitle: "Support ongoing development",
                                 buttonTitle: "Contribute",
@@ -28,6 +39,17 @@ struct TabContributionsView: View {
                             
                             SupportRow(
                                 icon: "bubble.left.and.bubble.right.fill",
+                                iconColor: .secondary,
+                                title: "Join Discord",
+                                subtitle: "Chat with the Warden community",
+                                buttonTitle: "Join",
+                                url: AppConstants.discordInviteURL
+                            )
+
+                            SettingsDivider()
+
+                            SupportRow(
+                                icon: "exclamationmark.bubble.fill",
                                 iconColor: .secondary,
                                 title: "Share Feedback",
                                 subtitle: "Report bugs or request features",

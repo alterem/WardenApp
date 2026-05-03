@@ -26,6 +26,8 @@ struct AppConstants {
     static let firaCode = "FiraCodeRoman-Regular"
     static let ptMono = "PTMono-Regular"
     static let thumbnailSize: CGFloat = 300
+    static let discordInviteURL = "https://discord.gg/fasY8gAQR"
+    static let donationURL = "https://karatsidhu.gumroad.com/l/warden"
     
     // MARK: - Preferences & Flags
     static let defaultPersonasFlag = "defaultPersonasAdded"

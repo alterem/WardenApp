@@ -191,7 +191,9 @@ struct WardenApp: App {
                         Based on macai by Renset (github.com/Renset/macai)
                         Licensed under Apache 2.0
                         
+                        Pay for Warden: karatsidhu.gumroad.com/l/warden
                         Support the developer: buymeacoffee.com/karatsidhu
+                        Discord: discord.gg/fasY8gAQR
                         Source code: github.com/SidhuK/WardenApp
                         """)
                     ])
@@ -208,6 +210,18 @@ struct WardenApp: App {
                 
                 Button("Send Feedback...") {
                     if let url = URL(string: "https://github.com/SidhuK/WardenApp/issues/new") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
+                Button("Pay for Warden...") {
+                    if let url = URL(string: AppConstants.donationURL) {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+
+                Button("Join Discord...") {
+                    if let url = URL(string: AppConstants.discordInviteURL) {
                         NSWorkspace.shared.open(url)
                     }
                 }

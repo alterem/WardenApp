@@ -26,9 +26,12 @@ struct ContentView: View {
     @AppStorage("gptModel") var gptModel = AppConstants.chatGptDefaultModel
     @AppStorage("lastOpenedChatId") var lastOpenedChatId = ""
     @AppStorage("apiUrl") var apiUrl = AppConstants.apiUrlChatCompletions
+    @AppStorage("hasSeenDiscordInvite") private var hasSeenDiscordInvite = false
+    @AppStorage("lastDonationPromptedVersion") private var lastDonationPromptedVersion = ""
     @StateObject private var previewStateManager = PreviewStateManager()
 
     @State private var openedChatId: String? = nil
+    @State private var isPresentingStartupPrompt = false
     
     // New state variables for inline project views
     @State private var showingCreateProject = false
@@ -135,6 +138,102 @@ struct ContentView: View {
             if let lastOpenedChat = chats.first(where: { $0.id == lastOpenedChatId }) {
                 selectedChat = lastOpenedChat
             }
+        }
+
+        showStartupPromptsIfNeeded()
+    }
+
+    private func showStartupPromptsIfNeeded() {
+        guard !isPresentingStartupPrompt else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            guard !isPresentingStartupPrompt else { return }
+
+            if shouldShowDonationPrompt {
+                presentDonationPrompt()
+            } else if !hasSeenDiscordInvite {
+                presentDiscordInvite()
+            }
+        }
+    }
+
+    private var shouldShowDonationPrompt: Bool {
+        lastDonationPromptedVersion != currentAppVersionIdentifier
+    }
+
+    private var currentAppVersionIdentifier: String {
+        let infoDictionary = Bundle.main.infoDictionary
+        let shortVersion = infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let buildNumber = infoDictionary?["CFBundleVersion"] as? String ?? ""
+
+        if buildNumber.isEmpty {
+            return shortVersion
+        }
+
+        return "\(shortVersion)-\(buildNumber)"
+    }
+
+    private func presentDonationPrompt() {
+        lastDonationPromptedVersion = currentAppVersionIdentifier
+        isPresentingStartupPrompt = true
+
+        let alert = NSAlert()
+        alert.messageText = "Support Warden"
+        alert.informativeText = "Warden is free to use. If it helps your workflow, please contribute what you can to support development."
+        alert.alertStyle = .informational
+        alert.icon = NSApp.applicationIconImage
+        alert.addButton(withTitle: "Contribute")
+        alert.addButton(withTitle: "Not Now")
+
+        presentStartupAlert(alert) { response in
+            isPresentingStartupPrompt = false
+
+            if response == .alertFirstButtonReturn {
+                openDonationPage()
+            } else if !hasSeenDiscordInvite {
+                showStartupPromptsIfNeeded()
+            }
+        }
+    }
+
+    private func presentDiscordInvite() {
+        hasSeenDiscordInvite = true
+        isPresentingStartupPrompt = true
+
+        let alert = NSAlert()
+        alert.messageText = "Join the Warden Discord"
+        alert.informativeText = "Chat with other Warden users, share feedback, and follow development."
+        alert.alertStyle = .informational
+        alert.icon = NSApp.applicationIconImage
+        alert.addButton(withTitle: "Join Discord")
+        alert.addButton(withTitle: "Not Now")
+
+        presentStartupAlert(alert) { response in
+            isPresentingStartupPrompt = false
+
+            if response == .alertFirstButtonReturn {
+                openDiscordInvite()
+            }
+        }
+    }
+
+    private func presentStartupAlert(_ alert: NSAlert, completion: @escaping (NSApplication.ModalResponse) -> Void) {
+        if let targetWindow = window ?? NSApp.keyWindow ?? NSApp.mainWindow {
+            alert.beginSheetModal(for: targetWindow, completionHandler: completion)
+        } else {
+            completion(alert.runModal())
+        }
+    }
+
+    private func openDonationPage() {
+        if let url = URL(string: AppConstants.donationURL) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    private func openDiscordInvite() {
+        if let url = URL(string: AppConstants.discordInviteURL) {
+            NSWorkspace.shared.open(url)
         }
     }
 

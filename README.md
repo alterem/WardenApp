@@ -81,6 +81,8 @@ Users who have downloaded the app version 0.9 or lower, please download the late
 Warden is open source and free. If you enjoy using it, you can support development:
 
 - [Star this repo](https://github.com/SidhuK/WardenApp) 🌟
+- [Pay for Warden](https://karatsidhu.gumroad.com/l/warden) — Warden is free to use, but please contribute if you can.
+- [Join the Discord](https://discord.gg/fasY8gAQR)
 - [Buy Me a Coffee](https://www.buymeacoffee.com/karatsidhu) ☕️
 
 ---
