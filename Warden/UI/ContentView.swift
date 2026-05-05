@@ -26,8 +26,10 @@ struct ContentView: View {
     @AppStorage("gptModel") var gptModel = AppConstants.chatGptDefaultModel
     @AppStorage("lastOpenedChatId") var lastOpenedChatId = ""
     @AppStorage("apiUrl") var apiUrl = AppConstants.apiUrlChatCompletions
-    @AppStorage("hasSeenDiscordInvite") private var hasSeenDiscordInvite = false
     @AppStorage("lastDonationPromptedVersion") private var lastDonationPromptedVersion = ""
+    @AppStorage("lastDiscordPromptedVersion") private var lastDiscordPromptedVersion = ""
+    @AppStorage("shouldSuppressDonationPrompt") private var shouldSuppressDonationPrompt = false
+    @AppStorage("shouldSuppressDiscordInvite") private var shouldSuppressDiscordInvite = false
     @StateObject private var previewStateManager = PreviewStateManager()
 
     @State private var openedChatId: String? = nil
@@ -151,14 +153,18 @@ struct ContentView: View {
 
             if shouldShowDonationPrompt {
                 presentDonationPrompt()
-            } else if !hasSeenDiscordInvite {
+            } else if shouldShowDiscordPrompt {
                 presentDiscordInvite()
             }
         }
     }
 
     private var shouldShowDonationPrompt: Bool {
-        lastDonationPromptedVersion != currentAppVersionIdentifier
+        !shouldSuppressDonationPrompt && lastDonationPromptedVersion != currentAppVersionIdentifier
+    }
+
+    private var shouldShowDiscordPrompt: Bool {
+        !shouldSuppressDiscordInvite && lastDiscordPromptedVersion != currentAppVersionIdentifier
     }
 
     private var currentAppVersionIdentifier: String {
@@ -184,20 +190,25 @@ struct ContentView: View {
         alert.icon = NSApp.applicationIconImage
         alert.addButton(withTitle: "Contribute")
         alert.addButton(withTitle: "Not Now")
+        configureDoNotShowAgainOption(for: alert)
 
         presentStartupAlert(alert) { response in
+            if isDoNotShowAgainEnabled(for: alert) {
+                shouldSuppressDonationPrompt = true
+            }
+
             isPresentingStartupPrompt = false
 
             if response == .alertFirstButtonReturn {
                 openDonationPage()
-            } else if !hasSeenDiscordInvite {
+            } else if shouldShowDiscordPrompt {
                 showStartupPromptsIfNeeded()
             }
         }
     }
 
     private func presentDiscordInvite() {
-        hasSeenDiscordInvite = true
+        lastDiscordPromptedVersion = currentAppVersionIdentifier
         isPresentingStartupPrompt = true
 
         let alert = NSAlert()
@@ -207,14 +218,29 @@ struct ContentView: View {
         alert.icon = NSApp.applicationIconImage
         alert.addButton(withTitle: "Join Discord")
         alert.addButton(withTitle: "Not Now")
+        configureDoNotShowAgainOption(for: alert)
 
         presentStartupAlert(alert) { response in
+            if isDoNotShowAgainEnabled(for: alert) {
+                shouldSuppressDiscordInvite = true
+            }
+
             isPresentingStartupPrompt = false
 
             if response == .alertFirstButtonReturn {
                 openDiscordInvite()
             }
         }
+    }
+
+    private func configureDoNotShowAgainOption(for alert: NSAlert) {
+        alert.showsSuppressionButton = true
+        alert.suppressionButton?.title = "Don't show again"
+        alert.suppressionButton?.state = .off
+    }
+
+    private func isDoNotShowAgainEnabled(for alert: NSAlert) -> Bool {
+        alert.suppressionButton?.state == .on
     }
 
     private func presentStartupAlert(_ alert: NSAlert, completion: @escaping (NSApplication.ModalResponse) -> Void) {
